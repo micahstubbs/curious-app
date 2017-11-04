@@ -26,7 +26,6 @@ public class MainActivity extends ReactActivity {
      * Returns whether dev mode should be enabled.
      * This enables e.g. the dev menu.
      */
-    @Override
     protected boolean getUseDeveloperSupport() {
         return BuildConfig.DEBUG;
     }
@@ -35,7 +34,6 @@ public class MainActivity extends ReactActivity {
      * A list of packages used by the app. If the app uses additional views
      * or modules besides the default ones, add more packages here.
      */
-    @Override
     protected List<ReactPackage> getPackages() {
         mReactNativePushNotificationPackage = new ReactNativePushNotificationPackage(this);
         return Arrays.<ReactPackage>asList(
@@ -46,7 +44,7 @@ public class MainActivity extends ReactActivity {
 
     // Add onNewIntent
     @Override
-    protected void onNewIntent (Intent intent) {
+    public void onNewIntent (Intent intent) {
       super.onNewIntent(intent);
 
       mReactNativePushNotificationPackage.newIntent(intent);

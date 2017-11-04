@@ -1,7 +1,4 @@
 {
-  "expo": {
-    "sdkVersion": "22.0.0"
-  },
-  "name": "curiousapp",
-  "displayName": "curious"
+  "name": "curious-app",
+  "displayName": "curious-app"
 }
