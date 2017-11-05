@@ -47,15 +47,41 @@ export default class App extends Component {
   componentDidMount() {
     AppState.addEventListener('change', this.handleAppStateChange);
 
-    let date = new Date(Date.now() + this.state.seconds * 1000);
+    // 3 years = 1095 days
+    const genArray = N => [
+      ...(function*() {
+        let i = 0;
+        while (i < N) yield i++;
+      })()
+    ];
+    const days = genArray(1095);
+    // milliseconds per day
+    const msPerDay = 1000 * 60 * 60 * 24;
+    let dates = days.map(day => {
+      // algo in comment form:
+      //
+      // convert Date.now() to 12a today
+      // add enough ms to get to 10a today
+      // add a random amount of ms between
+      // 0 and enough ms to get to 11p today
+      // add day * msPerDay offset
+      return new Date(Date.now() + day * msPerDay);
+    });
+
+    // let date = new Date(Date.now() + this.state.seconds * 1000);
 
     if (Platform.OS === 'ios') {
-      date = date.toISOString();
+      dates = dates.map(date => date.toISOString());
     }
-
-    PushNotification.localNotificationSchedule({
-      message: this.state.question,
-      date
+    console.log('dates', dates);
+    
+    // schedule 3 years of notifications
+    // TODO: add a way to cancel scheduled notifications
+    dates.forEach(date => {
+      PushNotification.localNotificationSchedule({
+        message: this.state.question,
+        date
+      });
     });
   }
 
@@ -128,8 +154,8 @@ export default class App extends Component {
         console.log('values from AsyncStorage', values);
         const hotNewThings = values.filter(d => {
           console.log('d[0]', d[0]);
-          console.log('d[0].substring(0, 12)', d[0].substring(0, 12))
-          return d[0].substring(0, 13) === '@HotNewThings'
+          console.log('d[0].substring(0, 12)', d[0].substring(0, 12));
+          return d[0].substring(0, 13) === '@HotNewThings';
         });
         console.log('hotNewThings', hotNewThings);
         const answers = hotNewThings.map(d => d[1]);
@@ -147,7 +173,8 @@ export default class App extends Component {
         const csvString = `${headerString}${rowString}`;
 
         // write the current list of answers to a local csv file
-        const pathToWrite = `${RNFetchBlob.fs.dirs.DownloadDir}/hot-new-things.csv`;
+        const pathToWrite = `${RNFetchBlob.fs.dirs
+          .DownloadDir}/hot-new-things.csv`;
         console.log('pathToWrite', pathToWrite);
         RNFetchBlob.fs
           .writeFile(pathToWrite, csvString, 'utf8')
