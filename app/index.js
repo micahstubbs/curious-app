@@ -9,6 +9,7 @@ import {
   TextInput,
   AsyncStorage
 } from 'react-native';
+import RNFetchBlob from 'react-native-fetch-blob';
 import PushController from './src/components/PushController';
 import PushNotification from 'react-native-push-notification';
 
@@ -125,8 +126,35 @@ export default class App extends Component {
       if (values !== null) {
         // We have data!!
         console.log('values from AsyncStorage', values);
-        const answers = values.map(d => d[1]);
+        const hotNewThings = values.filter(d => {
+          console.log('d[0]', d[0]);
+          console.log('d[0].substring(0, 12)', d[0].substring(0, 12))
+          return d[0].substring(0, 13) === '@HotNewThings'
+        });
+        console.log('hotNewThings', hotNewThings);
+        const answers = hotNewThings.map(d => d[1]);
         this.setState({ answers });
+
+        // construct csvString
+        const headerString = 'thing,timestamp\n';
+        const rowString = hotNewThings
+          .filter(d => {
+            console.log('d[0].substring(13)', d[0].substring(13));
+            return d[0].substring(13).length === 24;
+          }) // is it an ISO timestamp?
+          .map(d => `${d[1]},${d[0].substring(13)}\n`)
+          .join('');
+        const csvString = `${headerString}${rowString}`;
+
+        // write the current list of answers to a local csv file
+        const pathToWrite = `${RNFetchBlob.fs.dirs.DownloadDir}/hot-new-things.csv`;
+        console.log('pathToWrite', pathToWrite);
+        RNFetchBlob.fs
+          .writeFile(pathToWrite, csvString, 'utf8')
+          .then(() => {
+            console.log(`wrote file ${pathToWrite}`);
+          })
+          .catch(error => console.error(error));
       }
     } catch (error) {
       // Error fetching data
