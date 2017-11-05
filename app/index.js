@@ -27,6 +27,7 @@ export default class App extends Component {
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
     this.state = {
       seconds: 5,
+      question: "what's the hot new thing?"
     };
   }
 
@@ -60,6 +61,9 @@ export default class App extends Component {
   render() {
     return (
       <View style={styles.container}>
+        <Text style={styles.welcome}>
+          {this.state.question}
+        </Text>
         <Text style={styles.welcome}>
           Choose your notification time in seconds.
         </Text>
