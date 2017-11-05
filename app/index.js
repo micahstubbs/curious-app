@@ -46,6 +46,10 @@ export default class App extends Component {
         date = date.toISOString();
       }
 
+      PushNotification.localNotification({
+        message: "A message right away"
+      });
+
       PushNotification.localNotificationSchedule({
         message: "My Notification Message",
         date,
