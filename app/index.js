@@ -10,6 +10,8 @@ import {
   AsyncStorage
 } from 'react-native';
 import RNFetchBlob from 'react-native-fetch-blob';
+import moment from 'moment';
+
 import PushController from './src/components/PushController';
 import PushNotification from 'react-native-push-notification';
 
@@ -46,7 +48,44 @@ export default class App extends Component {
 
   componentDidMount() {
     AppState.addEventListener('change', this.handleAppStateChange);
+    this.checkNotifications();
+  }
 
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this.handleAppStateChange);
+  }
+
+  async checkNotifications() {
+    console.log('this.checkNotifications was called');
+    // have we created notifications on this device before?
+    try {
+      const value = await AsyncStorage.getItem(`@HotNewThingsNotifsToDate`);
+      if (value !== null) {
+        // We have data - yes we have
+        console.log(value);
+      } else {
+        // no we haven't created notifications on this device before
+        // set the date
+        const notifsToDate = moment()
+          .add(1095, 'days')
+          .toISOString();
+        try {
+          await AsyncStorage.setItem(`@HotNewThingsNotifsToDate`, notifsToDate);
+        } catch (error) {
+          // Error saving data
+          console.error(error);
+        }
+
+        // schedule the notifications
+        this.scheduleNotifications();
+      }
+    } catch (error) {
+      // Error retrieving data
+      console.error(error);
+    }
+  }
+
+  scheduleNotifications() {
     // 3 years = 1095 days
     const genArray = N => [
       ...(function*() {
@@ -55,17 +94,32 @@ export default class App extends Component {
       })()
     ];
     const days = genArray(1095);
-    // milliseconds per day
-    const msPerDay = 1000 * 60 * 60 * 24;
-    let dates = days.map(day => {
-      // algo in comment form:
-      //
+    let dates = days.map(dayCount => {
+    
       // convert Date.now() to 12a today
-      // add enough ms to get to 10a today
-      // add a random amount of ms between
-      // 0 and enough ms to get to 11p today
-      // add day * msPerDay offset
-      return new Date(Date.now() + day * msPerDay);
+      const notifMoment = moment().startOf('day');
+
+      // set time to 10a today
+      notifMoment.hours(10);
+
+      // add a random amount of time between
+      // 10a and 11p today
+      const randHours = Math.floor(Math.random() * 13);
+      const randMinutes = Math.floor(Math.random() * 60);
+      const randSeconds = Math.floor(Math.random() * 60);
+      const randMilliseconds = Math.floor(Math.random() * 1000);
+      notifMoment
+        .add(randHours, 'hours')
+        .add(randMinutes, 'minutes')
+        .add(randSeconds, 'seconds')
+        .add(randMilliseconds, 'milliseconds');
+
+      // add dayCount
+      notifMoment.add(dayCount, 'days');
+
+      // convert to Javascript Date object
+      const date = notifMoment.toDate();
+      return date;
     });
 
     // let date = new Date(Date.now() + this.state.seconds * 1000);
@@ -74,19 +128,15 @@ export default class App extends Component {
       dates = dates.map(date => date.toISOString());
     }
     console.log('dates', dates);
-    
+
     // schedule 3 years of notifications
     // TODO: add a way to cancel scheduled notifications
-    dates.forEach(date => {
-      PushNotification.localNotificationSchedule({
-        message: this.state.question,
-        date
-      });
-    });
-  }
-
-  componentWillUnmount() {
-    AppState.removeEventListener('change', this.handleAppStateChange);
+    // dates.forEach(date => {
+    //   PushNotification.localNotificationSchedule({
+    //     message: this.state.question,
+    //     date
+    //   });
+    // });
   }
 
   handleAppStateChange(appState) {
