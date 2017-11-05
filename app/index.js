@@ -65,7 +65,7 @@ export default class App extends Component {
   handleAppStateChange(appState) {
     if (appState === 'background') {
       let date = new Date(Date.now() + this.state.seconds * 1000);
-      this.setState({ editDate: date.toISOString });
+      // this.setState({ editDate: date.toISOString });
       if (Platform.OS === 'ios') {
         date = date.toISOString();
       }
@@ -83,6 +83,17 @@ export default class App extends Component {
 
   async onEndEditing() {
     console.log('onEndEditing was called');
+    if (typeof this.state.asyncStorageKeys === 'undefined') {
+      this.setState({ asyncStorageKeys: [] });
+    }
+    this.setState({ editDate: new Date(Date.now()).toISOString() });
+    console.log('this.state', this.state);
+    this.setState({
+      asyncStorageKeys: [
+        ...this.state.asyncStorageKeys,
+        `@HotNewThings${this.state.editDate}`
+      ]
+    });
     try {
       await AsyncStorage.setItem(
         `@HotNewThings${this.state.editDate}`,
@@ -91,6 +102,7 @@ export default class App extends Component {
     } catch (error) {
       // Error saving data
       console.error(error);
+      this.asyncStorageKeys.pop();
     }
 
     try {
@@ -105,9 +117,26 @@ export default class App extends Component {
       // Error retrieving data
       console.error(error);
     }
+
+    console.log('this.state.asyncStorageKeys', this.state.asyncStorageKeys);
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const values = await AsyncStorage.multiGet(keys);
+      if (values !== null) {
+        // We have data!!
+        console.log('values from AsyncStorage', values);
+        const answers = values.map(d => d[1]);
+        this.setState({ answers });
+      }
+    } catch (error) {
+      // Error fetching data
+      console.error(error);
+    }
   }
 
   render() {
+    const answers = this.state.answers ? this.state.answers.join(' ') : '';
+    console.log('answers', answers);
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>{this.state.question}</Text>
@@ -125,6 +154,7 @@ export default class App extends Component {
           placeholderTextColor={'lightgray'}
           value={this.state.text}
         />
+        <Text style={styles.welcome}>{answers}</Text>
         <PushController />
       </View>
     );
