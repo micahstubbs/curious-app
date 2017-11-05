@@ -175,14 +175,15 @@ export default class App extends Component {
   async onEndEditing() {
     console.log('onEndEditing was called');
     // set the editDate
-    this.setState({ editDate: moment().toISOString() });
+    const editDate = moment().toISOString();
+    this.setState({ editDate });
     console.log('this.state', this.state);
 
     // store the hot new thing just entered
     // by the user in AsyncStorage on the device
     try {
       const setItemResult = await AsyncStorage.setItem(
-        `@HotNewThings${this.state.editDate}`,
+        `@HotNewThings${editDate}`,
         `${this.state.text}`
       );
       if (setItemResult !== null) {
@@ -191,7 +192,7 @@ export default class App extends Component {
         this.setState({
           asyncStorageKeys: [
             ...this.state.asyncStorageKeys,
-            `@HotNewThings${this.state.editDate}`
+            `@HotNewThings${editDate}`
           ]
         });
       }
@@ -202,7 +203,7 @@ export default class App extends Component {
 
     try {
       const value = await AsyncStorage.getItem(
-        `@HotNewThings${this.state.editDate}`
+        `@HotNewThings${editDate}`
       );
       if (value !== null) {
         // We have data!!
