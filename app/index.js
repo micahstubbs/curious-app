@@ -207,7 +207,7 @@ export default class App extends Component {
       );
       if (value !== null) {
         // We have data!!
-        console.log(value);
+        console.log('value from AsyncStorage.getItem promise', value);
         this.setAnswers();
       }
     } catch (error) {
