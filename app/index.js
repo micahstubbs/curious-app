@@ -278,7 +278,7 @@ export default class App extends Component {
   }
 
   render() {
-    const answers = this.state.answers ? this.state.answers.join(' ') : '';
+    const answers = this.state.answers ? this.state.answers.reverse().join(' ') : '';
     console.log('answers from render | ', answers);
     return (
       <View style={styles.container}>
