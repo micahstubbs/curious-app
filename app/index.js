@@ -75,8 +75,11 @@ export default class App extends Component {
     // have we created notifications on this device before?
     try {
       const value = await AsyncStorage.getItem(`@HotNewThingsNotifsToDate`);
-      if (value !== null) {
-        // We have data - yes we have
+
+      // if notifsToDate is not null 
+      // and is after the current moment
+      // that is to say, in the future
+      if (value !== null && moment(value).isAfter()) {
         console.log('@HotNewThingsNotifsToDate', value);
       } else {
         // no we haven't created notifications on this device before
