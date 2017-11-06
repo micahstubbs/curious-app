@@ -278,7 +278,7 @@ export default class App extends Component {
   }
 
   render() {
-    const answers = this.state.answers ? this.state.answers.reverse().join(' ') : '';
+    const answers = this.state.answers ? this.state.answers.slice().reverse().join(' ') : '';
     console.log('answers from render | ', answers);
     return (
       <View style={styles.container}>
@@ -290,6 +290,7 @@ export default class App extends Component {
             borderColor: '#F5FCFF',
             borderWidth: 1
           }}
+          autoFocus={true}
           onChangeText={text => this.setState({ text })}
           onEndEditing={this.onEndEditing.bind(this)}
           editable={true}
