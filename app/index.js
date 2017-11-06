@@ -76,10 +76,10 @@ export default class App extends Component {
     try {
       const value = await AsyncStorage.getItem(`@HotNewThingsNotifsToDate`);
 
-      // if notifsToDate is not null 
-      // and is after the current moment
-      // that is to say, in the future
       if (value !== null && moment(value).isAfter()) {
+        // if notifsToDate is not null
+        // and is after the current moment
+        // that is to say, in the future
         console.log('@HotNewThingsNotifsToDate', value);
       } else {
         // no we haven't created notifications on this device before
@@ -205,9 +205,7 @@ export default class App extends Component {
     }
 
     try {
-      const value = await AsyncStorage.getItem(
-        `@HotNewThings${editDate}`
-      );
+      const value = await AsyncStorage.getItem(`@HotNewThings${editDate}`);
       if (value !== null) {
         // We have data!!
         console.log('value from AsyncStorage.getItem promise', value);
@@ -217,6 +215,10 @@ export default class App extends Component {
       // Error retrieving data
       console.error(error);
     }
+
+    // empty the text
+    // this will also clear the TextInput in the UI
+    this.setState({ text: '' });
   }
 
   // set the answers on local component state
